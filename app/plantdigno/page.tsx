@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import Footer from '@/components/footer';
 import Image from 'next/image';
 import {
@@ -27,18 +27,10 @@ const PlantDiagnosis: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [cameraSupported, setCameraSupported] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Check camera support on component mount
-  useEffect(() => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setCameraSupported(false);
-    }
-  }, []);
 
   // Image validation function
   const validateImage = (file: File): boolean => {
@@ -102,7 +94,6 @@ const PlantDiagnosis: React.FC = () => {
     } catch (error: unknown) {
       console.error('Camera access error:', error);
       setError('Camera access denied. Please check permissions.');
-      setCameraSupported(false);
     }
   };
 
@@ -119,35 +110,25 @@ const PlantDiagnosis: React.FC = () => {
       const canvas = canvasRef.current;
       const video = videoRef.current;
 
-      // Ensure video is ready and has valid dimensions
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-        setError('Camera not ready. Please try again.');
-        return;
-      }
-
       // Set canvas dimensions to match video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
       // Draw the current video frame on the canvas
       const context = canvas.getContext('2d');
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      context?.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Convert canvas to base64 image
-        const imageDataUrl = canvas.toDataURL('image/jpeg');
-        
-        // Stop the camera
-        stopCamera();
-        
-        // Set the captured image and trigger analysis
-        setSelectedImage(imageDataUrl);
-        analyzePlant(imageDataUrl);
-      } else {
-        setError('Failed to capture photo. Please try again.');
-      }
-    } else {
-      setError('Camera setup error. Please try again.');
+      // Convert canvas to base64 image
+      const imageDataUrl = canvas.toDataURL('image/jpeg');
+      
+      // Set the captured image
+      setSelectedImage(imageDataUrl);
+      
+      // Stop the camera
+      stopCamera();
+      
+      // Analyze the captured plant image
+      analyzePlant(imageDataUrl);
     }
   };
 
@@ -248,7 +229,6 @@ const PlantDiagnosis: React.FC = () => {
     setSelectedImage(null);
     setDiagnosis(null);
     setError(null);
-    stopCamera(); // Ensure camera is stopped
   };
 
   return (
@@ -271,7 +251,7 @@ const PlantDiagnosis: React.FC = () => {
             </div>
           )}
 
-          {!selectedImage && !diagnosis && !isLoading && !isCameraActive && (
+          {!selectedImage && !diagnosis && !isLoading && (
             <div className="space-y-4">
               <input
                 type="file"
@@ -279,7 +259,6 @@ const PlantDiagnosis: React.FC = () => {
                 className="hidden"
                 accept="image/jpeg,image/png"
                 onChange={handleFileUpload}
-                capture="environment" // Added capture attribute for direct camera access
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -289,23 +268,19 @@ const PlantDiagnosis: React.FC = () => {
                 Upload Image
               </button>
 
-              {cameraSupported && (
-                <>
-                  <div className="flex items-center justify-center space-x-4">
-                    <div className="h-px bg-gray-300 flex-grow"></div>
-                    <span className="text-gray-500">or</span>
-                    <div className="h-px bg-gray-300 flex-grow"></div>
-                  </div>
+              <div className="flex items-center justify-center space-x-4">
+                <div className="h-px bg-gray-300 flex-grow"></div>
+                <span className="text-gray-500">or</span>
+                <div className="h-px bg-gray-300 flex-grow"></div>
+              </div>
 
-                  <button
-                    onClick={startCamera}
-                    className="w-full flex items-center justify-center gap-3 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
-                  >
-                    <Camera className="w-5 h-5" />
-                    Take Photo
-                  </button>
-                </>
-              )}
+              <button
+                onClick={startCamera}
+                className="w-full flex items-center justify-center gap-3 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+              >
+                <Camera className="w-5 h-5" />
+                Take Photo
+              </button>
             </div>
           )}
 
@@ -321,20 +296,12 @@ const PlantDiagnosis: React.FC = () => {
                 ref={canvasRef} 
                 className="hidden" 
               />
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-4">
-                <button
-                  onClick={capturePhoto}
-                  className="bg-white shadow-lg p-3 rounded-full"
-                >
-                  <Camera className="w-6 h-6 text-emerald-600" />
-                </button>
-                <button
-                  onClick={stopCamera}
-                  className="bg-red-500 text-white shadow-lg p-3 rounded-full"
-                >
-                  <XCircle className="w-6 h-6" />
-                </button>
-              </div>
+              <button
+                onClick={capturePhoto}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white shadow-lg p-3 rounded-full"
+              >
+                <Camera className="w-6 h-6 text-emerald-600" />
+              </button>
             </div>
           )}
 
