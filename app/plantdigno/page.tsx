@@ -2,15 +2,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import Footer from '@/components/footer';
 import Image from 'next/image';
-import {
-  Camera,
-  Upload,
-  Leaf,
-  Loader2,
-  XCircle,
-  CheckCircle2,
-  AlertTriangle,
-} from 'lucide-react';
+import { Camera, Upload, Leaf, Loader2, XCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 // Types for better type safety
 type DiagnosisResult = {
@@ -88,12 +80,12 @@ const PlantDiagnosis: React.FC = () => {
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        await videoRef.current.play();
         setIsCameraActive(true);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Camera access error:', error);
-      setError('Camera access denied. Please check permissions.');
+      setError('Camera access denied. Please check permissions and try again.');
     }
   };
 
@@ -404,3 +396,4 @@ const PlantDiagnosis: React.FC = () => {
 };
 
 export default PlantDiagnosis;
+
