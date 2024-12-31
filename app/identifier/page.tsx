@@ -59,7 +59,7 @@ export default function Home() {
     try {
       setLoading(true);
 
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyA6zgXRx4V7uKbYshqyu002XDyXn5VoMAg');
+      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyBKHpGcwl-2RysYpa12dv7-99k3GPtOFoE');
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const fileReader = new FileReader();
